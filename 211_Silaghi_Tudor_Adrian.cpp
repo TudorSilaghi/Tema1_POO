@@ -1,6 +1,5 @@
 #include <iostream>
-#include <stdarg.h>
-#include <cstdarg>
+#include <stdlib.h>
 
 /* am comentat linia aceasta pentru ca aveam erori din cauza bibliotecii incluse.
    note: in mai multe articole am citit ca nu este o biblioteca portabila si nu este recomandata
@@ -45,9 +44,7 @@ public:
     friend int operator!=(vector& data1, vector& data2);
 
     friend int length(vector& data);                /* metoda ce returneaza lungimea vectorului */
-
-    friend vector& suma_vectorilor(int nr_vectori, vector& data1, ...);
-    friend vector& maximul_vectorilor(int nr_vectori, vector& data1, ...);
+    friend vector& maximul_vectorilor(vector& data1, vector& data2);
 };
 
 vector *vector_null = new vector(0, 0);             /* am declarat si initializat un vector fara
@@ -70,9 +67,9 @@ void vector::citire(istream &in)
     reactualizare(nr_dat, n);
 }
 
-istream& operator>>(istream& in, vector& v)
+istream& operator>>(istream& in, vector& data)
 {
-    v.citire(in);
+    data.citire(in);
     return in;
 }
 
@@ -94,10 +91,12 @@ ostream& operator<<(ostream& out, vector& data)
 vector& vector::operator=(vector& data)
 {
     n = data.n;
+    nr_dat = data.nr_dat;
     for (int i = 0; i < n; ++i)
     {
         v[i] = data.v[i];
     }
+    //reactualizare(nr_dat, n);
 }
 
 void vector::reactualizare(double nr_dat, int new_size)
@@ -121,6 +120,8 @@ void vector::citire_si_memorare_a_mai_multor_vectori()
 
     for (i = 0; i < nr_vectori; ++i)
         cin >> data[i];
+
+    cout << "\nVectorii sunt: " << endl;
 
     for (i = 0; i < nr_vectori; ++i)
         cout << data[i];
@@ -225,51 +226,19 @@ int length(vector &data)
     return data.n;
 }
 
-vector& suma_vectorilor(int nr_vectori, vector& data1, ...)
+vector& maximul_vectorilor(vector &data1, vector &data2)
 {
-    va_list lista_de_vectori;
-    vector *vector_suma = &data1;
-
-    va_start(lista_de_vectori, data1);
-    for (int i = 1; i < nr_vectori; ++i)
-        if (data1.n != va_arg(lista_de_vectori, vector).n)
-        {
-            cout << "\nVectorii NU au aceeasi dimensiune" << endl;
-            return *vector_null;
-        }
-    va_end(lista_de_vectori);
-
-    va_start(lista_de_vectori, data1);
-    for (int i = 1; i < nr_vectori; ++i)
-        *vector_suma += va_arg(lista_de_vectori, vector);
-    va_end(lista_de_vectori);
-
-    return *vector_suma;
-}
-
-vector& maximul_vectorilor(int nr_vectori, vector& data1, ...)
-{
-    va_list lista_de_vectori;
-    vector *vector_maxim = &data1;
-
-    va_start(lista_de_vectori, data1);
-    for (int i = 1; i < nr_vectori; ++i)
-        if (data1.n != va_arg(lista_de_vectori, vector).n)
-        {
-            cout << "\nVectorii NU au aceeasi dimensiune!" << endl;
-            return *vector_null;
-        }
-    va_end(lista_de_vectori);
-
-    va_start(lista_de_vectori, data1);
-    for (int i = 1; i < nr_vectori; ++i)
+    if (data1.n != data2.n)
     {
-        vector_maxim->nr_dat = max(vector_maxim->nr_dat, va_arg(lista_de_vectori, vector).nr_dat);
-        (*vector_maxim).reactualizare(vector_maxim->nr_dat, vector_maxim->n);
+        cout << "\nVectorii NU au aceeasi dimensiune!" << endl;
+        return *vector_null;
     }
-    va_end(lista_de_vectori);
 
-    return *vector_maxim;
+    if (data1.nr_dat > data2.nr_dat)
+    {
+        return data1;
+    }
+    else return data2;
 }
 
 void menu_output()
@@ -307,10 +276,10 @@ void menu()
         {
             vector data1, data2;
             cin >> data1;
-            cout << "Primul vector este: \n";
+            cout << "Primul vector este: ";
             cout << data1;
             cin >> data2;
-            cout << "Al doilea vector este: \n";
+            cout << "Al doilea vector este: ";
             cout << data2;
 
             if (length(data1 + data2))
@@ -319,10 +288,10 @@ void menu()
         {
             vector data1, data2;
             cin >> data1;
-            cout << "Primul vector este: \n";
+            cout << "Primul vector este: ";
             cout << data1;
             cin >> data2;
-            cout << "Al doilea vector este: \n";
+            cout << "Al doilea vector este: ";
             cout << data2;
 
             if (length(data1 - data2))
@@ -331,10 +300,10 @@ void menu()
         {
             vector data1, data2;
             cin >> data1;
-            cout << "Primul vector este: \n";
+            cout << "Primul vector este: ";
             cout << data1;
             cin >> data2;
-            cout << "Al doilea vector este: \n";
+            cout << "Al doilea vector este: ";
             cout << data2;
 
             if(data1 == data2)
@@ -346,10 +315,10 @@ void menu()
         {
             vector data1, data2;
             cin >> data1;
-            cout << "Primul vector este: \n";
+            cout << "Primul vector este: ";
             cout << data1;
             cin >> data2;
-            cout << "Al doilea vector este: \n";
+            cout << "Al doilea vector este: ";
             cout << data2;
 
             if (length(data1 += data2))
@@ -358,10 +327,10 @@ void menu()
         {
             vector data1, data2;
             cin >> data1;
-            cout << "Primul vector este: \n";
+            cout << "Primul vector este: ";
             cout << data1;
             cin >> data2;
-            cout << "Al doilea vector este: \n";
+            cout << "Al doilea vector este: ";
             cout << data2;
 
             if (length(data1 -= data2))
@@ -369,7 +338,7 @@ void menu()
         } else if (option == 6)
         {
             vector data;
-            cout << "\nScrie vectorul: \n";
+            cout << "\nScrie vectorul: ";
             cin >> data;
             cout << "Lungimea vectorului este: " << length(data) << endl;
         } else if (option == 7)
@@ -377,25 +346,27 @@ void menu()
             int nr, i;
             cout << "\nNumarul de vectori: ";
             cin >> nr;
-            vector data[nr], vector_suma;
+            vector *data = new vector[nr];
+            vector vector_suma;
             cin >> data[0];
-            cout << "Primul vector este: \n";
+            cout << "Primul vector este: ";
             cout << data[0];
 
             for (i = 1; i < nr; ++i)
             {
                 cin >> data[i];
-                cout << "Al " << i+1 << "-lea vector este: \n";
+                cout << "Al " << i+1 << "-lea vector este: ";
                 cout << data[i];
             }
             vector_suma = data[0];
             for (i = 1; i < nr; ++i)
             {
-                vector_suma = suma_vectorilor(2, vector_suma, data[i]);
+                vector_suma += data[i];
                 if (length(vector_suma) == 0)
                     break;
             }
 
+            delete[] data;
             if (length(vector_suma))
                 cout << "\nSuma vectorilor este: " << vector_suma << endl;
         } else if (option == 8)
@@ -403,25 +374,27 @@ void menu()
             int nr, i;
             cout << "\nNumarul de vectori: ";
             cin >> nr;
-            vector data[nr], vector_maxim;
+            vector *data = new vector[nr];
+            vector vector_maxim;
             cin >> data[0];
-            cout << "Primul vector este: \n";
+            cout << "Primul vector este: ";
             cout << data[0];
 
             for (i = 1; i < nr; ++i)
             {
                 cin >> data[i];
-                cout << "Al " << i+1 << "-lea vector este: \n";
+                cout << "Al " << i+1 << "-lea vector este: ";
                 cout << data[i];
             }
             vector_maxim = data[0];
             for (i = 1; i < nr; ++i)
             {
-                vector_maxim = maximul_vectorilor(2, vector_maxim, data[i]);
+                vector_maxim = maximul_vectorilor(vector_maxim, data[i]);
                 if (length(vector_maxim) == 0)
                     break;
             }
 
+            delete[] data;
             if (length(vector_maxim))
                 cout <<"\nMaximul veectorilor dati este: " << vector_maxim << endl;
         } else if (option == 9)
